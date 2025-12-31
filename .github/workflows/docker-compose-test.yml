@@ -48,11 +48,60 @@ jobs:
           timeout 120 bash -c 'until docker compose ps postgres | grep -q "healthy"; do sleep 2; done' || (echo "PostgreSQL health check failed. Logs:"; docker compose logs postgres; exit 1)
           echo "PostgreSQL is healthy!"
 
+      - name: Check n8n-import files accessibility
+        run: |
+          echo "Checking if demo-data files exist locally..."
+          ls -la n8n/demo-data/credentials/ || echo "Credentials directory not found"
+          ls -la n8n/demo-data/workflows/ || echo "Workflows directory not found"
+          echo ""
+          echo "Note: docker-compose mounts ./n8n/demo-data to /demo-data in container"
+          echo "If import fails, the path in docker-compose.yml might need to be /demo-data/credentials"
+
+      - name: Debug n8n-import container (if still running)
+        continue-on-error: true
+        run: |
+          if docker compose ps n8n-import | grep -q "Up\|starting"; then
+            echo "Container is still running, checking paths..."
+            echo "Checking /demo-data mount:"
+            docker compose exec -T n8n-import ls -la /demo-data/ 2>&1 || true
+            echo ""
+            echo "Checking if n8n/demo-data path exists (relative to working dir):"
+            docker compose exec -T n8n-import sh -c "ls -la n8n/demo-data/ 2>&1 || echo 'Path does not exist'" || true
+            echo ""
+            echo "Current working directory:"
+            docker compose exec -T n8n-import pwd || true
+          fi
+
       - name: Wait for n8n-import to complete
         run: |
           echo "Waiting for n8n-import to complete..."
-          timeout 300 bash -c 'until docker compose ps n8n-import | grep -q "Exited (0)"; do sleep 5; done' || (echo "n8n-import failed or timed out. Logs:"; docker compose logs n8n-import; exit 1)
-          echo "n8n-import completed successfully!"
+          set +e
+          timeout 300 bash -c 'until docker compose ps n8n-import | grep -q "Exited"; do 
+            echo "Still waiting for n8n-import... ($(date))"
+            docker compose logs --tail=10 n8n-import 2>&1 | tail -5
+            sleep 5
+          done'
+          
+          # Get the actual exit code
+          CONTAINER_STATUS=$(docker compose ps n8n-import | grep "Exited" || echo "")
+          set -e
+          
+          if echo "$CONTAINER_STATUS" | grep -q "Exited (0)"; then
+            echo "✅ n8n-import completed successfully!"
+          else
+            echo "❌ === n8n-import FAILED ==="
+            echo "Container status: $CONTAINER_STATUS"
+            echo ""
+            echo "=== Full n8n-import logs ==="
+            docker compose logs n8n-import || true
+            echo ""
+            echo "=== All service status ==="
+            docker compose ps
+            echo ""
+            echo "=== PostgreSQL connection test ==="
+            docker compose exec -T postgres pg_isready -U testuser -d testdb || true
+            exit 1
+          fi
 
       - name: Wait for n8n to start
         run: |
