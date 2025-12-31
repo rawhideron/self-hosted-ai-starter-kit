@@ -79,9 +79,9 @@ services:
     entrypoint: /bin/sh
     command:
       - "-c"
-      - "n8n import:credentials --separate --input=/demo-data/credentials && n8n import:workflow --separate --input=/demo-data/workflows"
+      - "n8n import:credentials --separate --input=n8n/demo-data/credentials && n8n import:workflow --separate --input=n8n/demo-data/workflows"
     volumes:
-      - ./n8n/demo-data:/demo-data
+      - ./n8n:/n8n
     depends_on:
       postgres:
         condition: service_healthy
