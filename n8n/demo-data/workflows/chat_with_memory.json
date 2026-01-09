@@ -215,6 +215,5 @@
   },
   "pinData": {},
   "versionId": "chat-memory-v1",
-  "triggerCount": 0,
-  "tags": ["chat", "memory", "postgresql"]
+  "triggerCount": 0
 } 

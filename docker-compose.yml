@@ -50,7 +50,7 @@ x-init-ollama: &init-ollama
     - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull llama3.2; OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text"
 
 x-qdrant: &service-qdrant
-  image: qdrant/qdrant"
+  image: qdrant/qdrant
 
 services:
   postgres:
@@ -79,9 +79,9 @@ services:
     entrypoint: /bin/sh
     command:
       - "-c"
-      - "n8n import:credentials --separate --input=n8n/demo-data/credentials && n8n import:workflow --separate --input=n8n/demo-data/workflows"
+      - "n8n import:credentials --separate --input=/n8n/demo-data/credentials && n8n import:workflow --separate --input=/n8n/demo-data/workflows"
     volumes:
-      - ./n8n/demo-data:/demo-data
+      - ./n8n:/n8n
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,7 +95,7 @@ services:
       - 5678:5678
     volumes:
       - n8n_storage:/home/node/.n8n
-      - ./n8n/demo-data:/demo-data
+      - ./n8n:/n8n
       - ./shared:/data/shared
     depends_on:
       postgres:
