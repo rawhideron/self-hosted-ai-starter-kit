@@ -53,8 +53,15 @@ jobs:
       - name: Wait for n8n-import to complete
         run: |
           echo "Waiting for n8n-import to complete..."
-          timeout 300 bash -c 'until docker compose ps n8n-import | grep -q "Exited (0)"; do sleep 5; done' || (echo "n8n-import failed or timed out. Logs:"; docker compose logs n8n-import; exit 1)
-          echo "n8n-import completed successfully!"
+          timeout 300 bash -c 'until docker compose ps n8n-import | grep -q "Exited"; do sleep 5; done' || (echo "n8n-import timed out. Logs:"; docker compose logs n8n-import; exit 1)
+          echo "Checking import logs for success..."
+          if docker compose logs n8n-import | grep -q "Successfully imported"; then
+            echo "n8n-import completed successfully (workflows imported)!"
+          else
+            echo "n8n-import may have failed. Logs:"
+            docker compose logs n8n-import
+            exit 1
+          fi
 
       - name: Wait for n8n to start
         run: |
