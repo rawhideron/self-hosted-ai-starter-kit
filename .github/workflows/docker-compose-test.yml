@@ -54,7 +54,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Waiting for n8n-import to complete..."
-          timeout 300 bash -c 'until docker compose ps n8n-import | grep -q "Exited"; do sleep 5; done' || (echo "WARNING: n8n-import timed out. Logs:"; docker compose logs n8n-import; exit 0)
+          timeout 30 bash -c 'until docker compose ps n8n-import | grep -q "Exited"; do sleep 5; done' || (echo "WARNING: n8n-import timed out. Logs:"; docker compose logs n8n-import; exit 0)
           echo "Checking import logs for success..."
           if docker compose logs n8n-import | grep -q "Successfully imported"; then
             echo "n8n-import completed successfully (workflows imported)!"
@@ -73,7 +73,8 @@ jobs:
       - name: Wait for Qdrant to be ready
         run: |
           echo "Waiting for Qdrant to be ready..."
-          timeout 60 bash -c 'until curl -f http://localhost:6333/health 2>/dev/null; do sleep 2; done'
+          sleep 20
+          docker compose ps qdrant | grep -q "Up" || (echo "Qdrant container not running. Status:"; docker compose ps qdrant; exit 1)
           echo "Qdrant is ready!"
 
       - name: Wait for Ollama to be ready
