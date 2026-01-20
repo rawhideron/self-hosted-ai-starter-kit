@@ -73,4 +73,7 @@ The workflow references these credential types:
 - The workflow is inactive by default (`"active": false`).
 - The vector collection name is `documents`.
 - The Clear Old Vectors node deletes by `metadata.file_id` to avoid stale data.
+- Credentials created in the n8n UI are stored in Postgres (and encrypted with
+  `N8N_ENCRYPTION_KEY`), not in `n8n/demo-data/credentials`. The demo directory
+  is only for one-off imports.
 

@@ -47,13 +47,17 @@ cp .env.example .env # you should update secrets and passwords inside
 
 ### Running n8n using Docker Compose
 
+If you use the legacy `docker-compose` CLI and need `sudo`, replace `docker compose`
+with `sudo docker-compose` in the commands below (for example,
+`sudo docker-compose --profile cpu up`).
+
 #### For Nvidia GPU users
 
 ```bash
 git clone https://github.com/n8n-io/self-hosted-ai-starter-kit.git
 cd self-hosted-ai-starter-kit
 cp .env.example .env # you should update secrets and passwords inside
-docker compose --profile gpu-nvidia up
+sudo docker-compose --profile gpu-nvidia up
 ```
 
 > [!NOTE]
@@ -66,7 +70,7 @@ docker compose --profile gpu-nvidia up
 git clone https://github.com/n8n-io/self-hosted-ai-starter-kit.git
 cd self-hosted-ai-starter-kit
 cp .env.example .env # you should update secrets and passwords inside
-docker compose --profile gpu-amd up
+sudo docker-compose --profile gpu-amd up
 ```
 
 #### For Mac / Apple Silicon users
@@ -87,7 +91,7 @@ for installation instructions, and run the starter kit as follows:
 git clone https://github.com/n8n-io/self-hosted-ai-starter-kit.git
 cd self-hosted-ai-starter-kit
 cp .env.example .env # you should update secrets and passwords inside
-docker compose up
+sudo docker-compose up
 ```
 
 ##### For Mac users running OLLAMA locally
@@ -107,7 +111,7 @@ If you're running OLLAMA locally on your Mac (not in Docker), you need to modify
 git clone https://github.com/n8n-io/self-hosted-ai-starter-kit.git
 cd self-hosted-ai-starter-kit
 cp .env.example .env # you should update secrets and passwords inside
-docker compose --profile cpu up
+sudo docker-compose --profile cpu up
 ```
 
 ## ⚡️ Quick start and usage
@@ -125,6 +129,16 @@ After completing the installation steps above, simply follow the steps below to 
    console logs to check on the progress.
 
 To open n8n at any time, visit <http://localhost:5678/> in your browser.
+
+### Demo data import (optional)
+
+This starter kit ships with demo workflows and credentials under `n8n/demo-data`.
+They are only imported when you run the one-off import service. Avoid running
+it on every startup, or it will overwrite changes you made in the UI.
+
+```bash
+sudo docker-compose --profile import up n8n-import
+```
 
 With your n8n instance, you’ll have access to over 400 integrations and a
 suite of basic and advanced AI nodes such as
